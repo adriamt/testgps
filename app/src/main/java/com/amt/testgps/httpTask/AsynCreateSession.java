@@ -47,7 +47,7 @@ public class AsynCreateSession {
 
             codi_resposta = (String.valueOf(myURLConnection.getResponseCode()));
 
-            System.out.println("Sent: " + outputInBytes + " to " + myURL + " received " + codi_resposta);
+            //System.out.println("Sent: " + outputInBytes + " to " + myURL + " received " + codi_resposta);
 
 
             if (GZIP_CONTENT_TYPE.equals(myURLConnection.getContentEncoding()))            {

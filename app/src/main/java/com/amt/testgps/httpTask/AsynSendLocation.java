@@ -23,8 +23,8 @@ public class AsynSendLocation {
     public String SendLocation(String longitude, String latitude, String session_id){
         try {
             String postData = "{" +
-                    "\"lat\":" + latitude +
-                    "\"lon\":" + longitude +
+                    "\"lat\":" + latitude + "," +
+                    "\"lon\":" + longitude + "," +
                     "\"session_id\":" + session_id +
                     "}";
 
@@ -48,7 +48,7 @@ public class AsynSendLocation {
 
             codi_resposta = (String.valueOf(myURLConnection.getResponseCode()));
 
-            System.out.println("Sent: " + outputInBytes + " to " + myURL + " received " + codi_resposta);
+            //System.out.println("Sent: " + outputInBytes + " to " + myURL + " received " + codi_resposta);
 
 
             if (GZIP_CONTENT_TYPE.equals(myURLConnection.getContentEncoding()))            {

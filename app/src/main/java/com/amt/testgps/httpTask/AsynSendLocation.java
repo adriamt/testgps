@@ -20,7 +20,7 @@ public class AsynSendLocation {
     private String resposta = "";
     private String codi_resposta = "";
 
-    public String SendLocation(String longitude, String latitude, String session_id){
+    public String SendLocation(String latitude, String longitude, String session_id){
         try {
             String postData = "{" +
                     "\"lat\":" + latitude + "," +

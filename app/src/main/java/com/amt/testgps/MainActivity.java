@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     double latitude = 0;
     double longitude = 0;
     double altitude = 0;
+    float battery = 0;
 
 
     @Override
@@ -99,9 +100,11 @@ public class MainActivity extends AppCompatActivity {
                     latitude = gps.getLatitude();
                     longitude = gps.getLongitude();
                     altitude = gps.getAltitude();
+                    battery = getBatteryLevel();
 
                     // \n is for new line
-                    Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude +  "\nAltitude: " + altitude , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude +  "\nAltitude: " + altitude
+                            + "\nBat: " + battery, Toast.LENGTH_SHORT).show();
 
                     new HttpHandler() {
                         @Override
@@ -114,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                             back_dialog.show(getFragmentManager(), "Info msg");
 
                         }
-                    }.send_location(String.valueOf(latitude), String.valueOf(longitude),session_id,String.valueOf(getBatteryLevel()));
+                    }.send_location(String.valueOf(latitude), String.valueOf(longitude),session_id,String.valueOf(battery));
 
 
                 }else{

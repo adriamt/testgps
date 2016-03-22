@@ -13,8 +13,8 @@ public abstract class HttpHandler {
         new AsyncHttpTask(this).execute("CreateSession", user_id);
     }
 
-    public void send_location(String latitude, String longitude, String session_id){
-        new AsyncHttpTask(this).execute("SendLocation", latitude, longitude, session_id);
+    public void send_location(String latitude, String longitude, String session_id, String battery){
+        new AsyncHttpTask(this).execute("SendLocation", latitude, longitude, session_id, battery);
     }
 
 }

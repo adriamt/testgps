@@ -20,12 +20,13 @@ public class AsynSendLocation {
     private String resposta = "";
     private String codi_resposta = "";
 
-    public String SendLocation(String latitude, String longitude, String session_id){
+    public String SendLocation(String latitude, String longitude, String session_id,String battery){
         try {
             String postData = "{" +
                     "\"lat\":" + latitude + "," +
                     "\"lon\":" + longitude + "," +
-                    "\"session_id\":" + session_id +
+                    "\"session_id\":" + session_id + "," +
+                    "\"battery\":" + battery +
                     "}";
 
             URL myURL = new URL("http://www.raidmaqui.com/live/api/session/log");

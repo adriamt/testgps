@@ -24,7 +24,7 @@ public class AsyncHttpTask extends AsyncTask<String, Void, String>{
                 resposta = new AsynCreateSession().CreateSession(arg0[1]);
                 return resposta;
             case "SendLocation":
-                resposta = new AsynSendLocation().SendLocation(arg0[1],arg0[2],arg0[3]);
+                resposta = new AsynSendLocation().SendLocation(arg0[1],arg0[2],arg0[3],arg0[4]);
                 return resposta;
             default:
                 return resposta;

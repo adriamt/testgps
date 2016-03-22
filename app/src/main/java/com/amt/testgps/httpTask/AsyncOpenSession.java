@@ -35,12 +35,9 @@ public class AsyncOpenSession {
             myURLConnection.setRequestMethod("POST");
             myURLConnection.setRequestProperty("Accept-Charset", "utf-8");
             myURLConnection.setRequestProperty("Content-Type", "application/json");
-            //myURLConnection.setRequestProperty("User-Agent", "Monsters/a.3.1.3");
             myURLConnection.setRequestProperty("Connection","Keep-Alive");
             myURLConnection.setRequestProperty("Accept-Encoding","gzip");
-            //myURLConnection.setRequestProperty("Host","puzzlemonsters.pennypop.com");
             myURLConnection.setRequestProperty("Content-Length", "" + Integer.toString(postData.getBytes().length));
-            //myURLConnection.setUseCaches(false);
             myURLConnection.setDoInput(true);
             myURLConnection.setDoOutput(true);
             byte[] outputInBytes = postData.getBytes("UTF-8");
@@ -50,18 +47,13 @@ public class AsyncOpenSession {
 
             codi_resposta = (String.valueOf(myURLConnection.getResponseCode()));
 
-            //System.out.println("Sent: " + outputInBytes + " to " + myURL + " received " + codi_resposta);
 
-
-            if (GZIP_CONTENT_TYPE.equals(myURLConnection.getContentEncoding()))            {
-                System.out.println("Using gzip stream");
+            if (GZIP_CONTENT_TYPE.equals(myURLConnection.getContentEncoding())){
                 inputStream = new GZIPInputStream(myURLConnection.getInputStream());
             }else{
-                System.out.println("Using uncompressed stream");
                 inputStream =  myURLConnection.getInputStream();
             }
 
-            System.out.println(inputStream);
 
             if(codi_resposta.equals("200")) {
                 try {
@@ -70,7 +62,6 @@ public class AsyncOpenSession {
                     String response ;
                     while((response = reader.readLine()) != null) {
                         sb.append(response);
-                        System.out.println(response);
                     }
                     JSONObject jo = new JSONObject((String.valueOf(sb)));
                     JSONArray data = jo.getJSONArray("data");
@@ -85,7 +76,6 @@ public class AsyncOpenSession {
                 String response;
                 while((response = reader.readLine()) != null) {
                     sb.append(response);
-                    System.out.println(response);
                 }
                 resposta = (String.valueOf(sb));
             }

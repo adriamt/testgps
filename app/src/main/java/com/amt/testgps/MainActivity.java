@@ -1,8 +1,13 @@
 package com.amt.testgps;
 
+import android.app.AlarmManager;
 import android.app.DialogFragment;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -21,9 +26,11 @@ import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btnSendLocation;
+
     Button btnLogin;
     Button btnCreateSession;
+    Button btnStartService;
+    Button btnStopService;
 
     String user_id = "";
     String session_id = "";
@@ -31,10 +38,7 @@ public class MainActivity extends AppCompatActivity {
     // GPSTracker class
     GPSTracker gps;
 
-    double latitude = 0;
-    double longitude = 0;
-    double altitude = 0;
-    float battery = 0;
+    public static final String PREFS_NAME = "GPS_PREFS";
 
 
     @Override
@@ -44,7 +48,10 @@ public class MainActivity extends AppCompatActivity {
 
         btnLogin = (Button) findViewById(R.id.btnLogin);
         btnCreateSession = (Button) findViewById(R.id.btnCreate);
-        btnSendLocation = (Button) findViewById(R.id.btnShowLocation);
+        btnStartService = (Button) findViewById(R.id.btnStartService);
+        btnStopService = (Button) findViewById(R.id.btnStopService);
+
+        gps = new GPSTracker(this);
 
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
@@ -69,80 +76,90 @@ public class MainActivity extends AppCompatActivity {
         btnCreateSession.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new HttpHandler() {
-                    @Override
-                    public void onResponse(String result) {
-                        session_id = result;
-                        DialogFragment back_dialog = new GeneralDialogFragment();
-                        Bundle args = new Bundle();
-                        args.putString("msg", session_id);
-                        back_dialog.setArguments(args);
-                        back_dialog.show(getFragmentManager(), "Info msg");
-
-                    }
-                }.create_session(user_id);
-
-            }
-        });
-
-
-        // show location button click event
-        btnSendLocation.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View arg0) {
-                // create class object
-                gps = new GPSTracker(MainActivity.this);
-
-                // check if GPS enabled
-                if(gps.canGetLocation()){
-
-                    latitude = gps.getLatitude();
-                    longitude = gps.getLongitude();
-                    altitude = gps.getAltitude();
-                    battery = getBatteryLevel();
-
-                    // \n is for new line
-                    Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + latitude + "\nLong: " + longitude +  "\nAltitude: " + altitude
-                            + "\nBat: " + battery, Toast.LENGTH_SHORT).show();
-
                     new HttpHandler() {
                         @Override
                         public void onResponse(String result) {
-                            user_id = result;
+                            session_id = result;
                             DialogFragment back_dialog = new GeneralDialogFragment();
                             Bundle args = new Bundle();
-                            args.putString("msg", user_id);
+                            args.putString("msg", session_id);
                             back_dialog.setArguments(args);
                             back_dialog.show(getFragmentManager(), "Info msg");
 
                         }
-                    }.send_location(String.valueOf(latitude), String.valueOf(longitude),session_id,String.valueOf(battery));
+                    }.create_session(user_id);
+            }
+        });
 
-
+        btnStartService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gps.getLocation();
+                if(gps.canGetLocation()) {
+                    if(session_id.equals("")){
+                        DialogFragment back_dialog = new GeneralDialogFragment();
+                        Bundle args = new Bundle();
+                        String msg = "Es necessari fer Login primer";
+                        args.putString("msg", msg);
+                        back_dialog.setArguments(args);
+                        back_dialog.show(getFragmentManager(), "Login miss");
+                    }else if(user_id.equals("")){
+                        DialogFragment back_dialog = new GeneralDialogFragment();
+                        Bundle args = new Bundle();
+                        String msg = "Es necessari fer CreateSession primer";
+                        args.putString("msg", msg);
+                        back_dialog.setArguments(args);
+                        back_dialog.show(getFragmentManager(), "Session miss");
+                    }else{
+                        SharedPreferences settings;
+                        SharedPreferences.Editor editor;
+                        settings = getBaseContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                        editor = settings.edit();
+                        editor.putString("session_id", session_id);
+                        editor.putString("user_id", user_id);
+                        editor.apply();
+                        scheduleAlarm();
+                    }
                 }else{
 
                     // can't get location
                     // GPS or Network is not enabled
                     // Ask user to enable GPS/network in settings
                     gps.showSettingsAlert();
-                }
 
+                }
+            }
+        });
+
+        btnStopService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cancelAlarm();
             }
         });
     }
 
-    public float getBatteryLevel() {
-        Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+    public void scheduleAlarm() {
+        // Construct an intent that will execute the AlarmReceiver
+        Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
+        // Create a PendingIntent to be triggered when the alarm goes off
+        final PendingIntent pIntent = PendingIntent.getBroadcast(this, MyAlarmReceiver.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // Setup periodic alarm every 5 seconds
+        long firstMillis = System.currentTimeMillis(); // alarm is set right away
+        AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        // First parameter is the type: ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC_WAKEUP
+        // Interval can be INTERVAL_FIFTEEN_MINUTES, INTERVAL_HALF_HOUR, INTERVAL_HOUR, INTERVAL_DAY
+        alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis,
+                1*60*1000, pIntent);
+    }
 
-        // Error checking that probably isn't needed but I added just in case.
-        if(level == -1 || scale == -1) {
-            return 50.0f;
-        }
-
-        return ((float)level / (float)scale) * 100.0f;
+    public void cancelAlarm() {
+        Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
+        final PendingIntent pIntent = PendingIntent.getBroadcast(this, MyAlarmReceiver.REQUEST_CODE,
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        alarm.cancel(pIntent);
     }
 
 }

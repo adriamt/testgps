@@ -3,9 +3,8 @@
     package="com.amt.testgps">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-
 
     <application
         android:allowBackup="true"
@@ -23,6 +22,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".MyLogService"
+            android:exported="false" />
+
+        <receiver
+            android:name=".MyAlarmReceiver"
+            android:process=":remote"/>
     </application>
 
 </manifest>

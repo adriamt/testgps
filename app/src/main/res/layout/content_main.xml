@@ -26,15 +26,27 @@
         android:layout_height="wrap_content"
         android:id="@+id/btnCreate"
         android:text="Create Session"
-        android:layout_below="@+id/btnLogin"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btnStartService"
+        android:text="StartService"
+        android:layout_marginTop="50dp"
+        android:layout_below="@+id/btnCreate"
         android:layout_alignParentLeft="true"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btnShowLocation"
-        android:text="SendLocation"
-        android:layout_below="@+id/btnCreate"
+        android:id="@+id/btnStopService"
+        android:text="StopService"
+        android:layout_marginTop="100dp"
+        android:layout_below="@+id/btnStartService"
         android:layout_alignParentLeft="true"/>
 
 

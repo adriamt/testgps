@@ -10,10 +10,12 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +24,11 @@ import android.widget.Toast;
 
 import com.amt.testgps.httpTask.HttpHandler;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
@@ -61,9 +68,20 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String result) {
                         user_id = result;
+                        String temp = "";
+                        Calendar c = Calendar.getInstance();
+                        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                        String formattedDate = df.format(c.getTime());
+                        if (!result.equals("")){
+                            temp = "Login OK!";
+                            writeToFile("["+formattedDate+"] "+"Login OK. Session ID: " + session_id + "\\r\\n");
+                        }else{
+                            temp = "Login Error!";
+                            writeToFile("["+formattedDate+"] "+"Login Error." );
+                        }
                         DialogFragment back_dialog = new GeneralDialogFragment();
                         Bundle args = new Bundle();
-                        args.putString("msg", user_id);
+                        args.putString("msg", temp);
                         back_dialog.setArguments(args);
                         back_dialog.show(getFragmentManager(), "Info msg");
 
@@ -80,9 +98,20 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(String result) {
                             session_id = result;
+                            String temp = "";
+                            Calendar c = Calendar.getInstance();
+                            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+                            String formattedDate = df.format(c.getTime());
+                            if (!result.equals("")){
+                                temp = "OpenSession OK!";
+                                writeToFile("["+formattedDate+"] "+"OpenSession OK. Session ID: " + session_id);
+                            }else{
+                                temp = "OpenSession Error!";
+                                writeToFile("["+formattedDate+"] "+"OpenSession Error.");
+                            }
                             DialogFragment back_dialog = new GeneralDialogFragment();
                             Bundle args = new Bundle();
-                            args.putString("msg", session_id);
+                            args.putString("msg", temp);
                             back_dialog.setArguments(args);
                             back_dialog.show(getFragmentManager(), "Info msg");
 
@@ -118,6 +147,7 @@ public class MainActivity extends AppCompatActivity {
                         editor.putString("session_id", session_id);
                         editor.putString("user_id", user_id);
                         editor.apply();
+                        Toast.makeText(getBaseContext(),"Service Started!",Toast.LENGTH_SHORT).show();
                         scheduleAlarm();
                     }
                 }else{
@@ -134,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
         btnStopService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(getBaseContext(),"Service Stoped!",Toast.LENGTH_SHORT).show();
                 cancelAlarm();
             }
         });
@@ -151,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
         // First parameter is the type: ELAPSED_REALTIME, ELAPSED_REALTIME_WAKEUP, RTC_WAKEUP
         // Interval can be INTERVAL_FIFTEEN_MINUTES, INTERVAL_HALF_HOUR, INTERVAL_HOUR, INTERVAL_DAY
         alarm.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis,
-                1*60*1000, pIntent);
+                1 * 60 * 1000, pIntent);
     }
 
     public void cancelAlarm() {
@@ -160,6 +191,25 @@ public class MainActivity extends AppCompatActivity {
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarm = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         alarm.cancel(pIntent);
+    }
+
+    private void writeToFile(String data) {
+        File storage = new File(Environment.getExternalStorageDirectory(), "TESTGPS");
+        if (! storage.exists()){
+            if (! storage.mkdirs()){
+                Log.d("TESTGPS", "failed to create directory");
+            }
+        }
+
+        try {
+            FileWriter fileW = new FileWriter(Environment.getExternalStorageDirectory().getPath() + "/TESTGPS/Log.txt",true);
+            fileW.append(data);
+            fileW.append("\r\n");
+            fileW.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
     }
 
 }
